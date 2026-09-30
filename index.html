@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast70 - بوابة الأمان الموحدة</title>
+    <style>
+        * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+        body { background-color: #0b0b0b; color: #fff; font-family: sans-serif; text-align: center; margin: 0; padding: 10vh 15px; }
+        .logo { font-size: 42px; font-weight: bold; margin-bottom: 25px; }
+        .logo span { color: #e50914; }
+        .card { background-color: #141414; border: 1px solid #333; border-radius: 12px; width: 100%; max-width: 360px; margin: 0 auto; padding: 30px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; }
+        .card.active { display: block; }
+        h2 { color: #e50914; margin-bottom: 25px; font-size: 22px; }
+        label { display: block; text-align: right; margin-bottom: 8px; color: #aaa; font-size: 14px; }
+        .input-field { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background-color: #222; color: #fff; box-sizing: border-box; margin-bottom: 18px; font-size: 15px; }
+        .input-field:focus { outline: none; border-color: #e50914; }
+        .btn { width: 100%; padding: 14px; background-color: #e50914; border: none; color: white; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .btn:hover { background-color: #b20710; }
+        .links-row { margin-top: 20px; display: flex; justify-content: space-between; font-size: 13px; }
+        .links-row a { color: #e50914; text-decoration: none; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="logo">Fas<span>T70</span></div>
+
+    <!-- 1. كرت تسجيل الدخول الرسمي -->
+    <div id="loginCard" class="card active">
+        <h2>تسجيل الدخول</h2>
+        <form id="loginForm">
+            <label>اسم المستخدم أو البريد</label>
+            <input type="text" id="loginUser" class="input-field" value="saad2abbas6" required>
+            <label>كلمة المرور</label>
+            <input type="password" id="loginPass" class="input-field" value="123456" required>
+            <button type="submit" class="btn">دخول</button>
+        </form>
+        <div class="links-row">
+            <a onclick="switchCard('registerCard')">إنشاء حساب جديد</a>
+            <a onclick="switchCard('resetCard')">نسيت كلمة المرور؟</a>
+        </div>
+    </div>
+
+    <!-- 2. كرت إنشاء حساب جديد مطور -->
+    <div id="registerCard" class="card">
+        <h2>إنشاء حساب جديد</h2>
+        <form id="registerForm">
+            <label>اسم المستخدم</label>
+            <input type="text" id="regUser" class="input-field" placeholder="أدخل اسم مستخدم فريد" required>
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="regEmail" class="input-field" placeholder="example@mail.com" required>
+            <label>رقم هويتك الوطني</label>
+            <input type="number" id="regNationalId" class="input-field" placeholder="أدخل رقم الهوية لحماية الحساب" required>
+            <label>تاريخ ميلادك (السنة فقط)</label>
+            <input type="number" id="regBirthYear" class="input-field" placeholder="مثال: 2000" required>
+            <label>كلمة المرور</label>
+            <input type="password" id="regPass" class="input-field" placeholder="أدخل كلمة مرور قوية" required>
+            <button type="submit" class="btn">تسجيل الحساب</button>
+        </form>
+        <div class="links-row" style="justify-content: center;">
+            <a onclick="switchCard('loginCard')">العودة لتسجيل الدخول</a>
+        </div>
+    </div>
+
+    <!-- 3. كرت إعادة تعيين كلمة المرور بالشروط الصارمة -->
+    <div id="resetCard" class="card">
+        <h2>استعادة الحساب والأمان</h2>
+        <form id="resetForm">
+            <label>البريد الإلكتروني المسجل</label>
+            <input type="email" id="resetEmail" class="input-field" required placeholder="example@mail.com">
+            <label>رقم هويتك الوطني للتحقق</label>
+            <input type="number" id="resetNationalId" class="input-field" required placeholder="أدخل رقم هويتك">
+            <label>سنة الميلاد (السنة فقط بدون يوم ولا شهر)</label>
+            <input type="number" id="resetBirthYear" class="input-field" required placeholder="مثال: 2000">
+            <label>كلمة المرور الجديدة</label>
+            <input type="password" id="resetNewPass" class="input-field" required placeholder="أدخل كلمة مرور جديدة">
+            <button type="submit" class="btn">إعادة تعيين وتحديث</button>
+        </form>
+        <div class="links-row" style="justify-content: center;">
+            <a onclick="switchCard('loginCard')">العودة لتسجيل الدخول</a>
+        </div>
+    </div>
+
+    <script>
+        function switchCard(cardId) {
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            document.getElementById(cardId).classList.add('active');
+        }
+
+        // كود معالجة الدخول
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: document.getElementById('loginUser').value, password: document.getElementById('loginPass').value })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === "success") {
+                    localStorage.setItem('user_id', data.user.id);
+                    window.location.href = "/dashboard.html";
+                } else { alert(data.message); }
+            } catch { alert("خطأ في الاتصال بالخادم"); }
+        });
+
+        // كود معالجة التسجيل الجديد الشامل
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('regUser').value,
+                        email: document.getElementById('regEmail').value,
+                        password: document.getElementById('regPass').value,
+                        national_id: document.getElementById('regNationalId').value,
+                        birth_year: document.getElementById('regBirthYear').value
+                    })
+                });
+                const data = await res.json();
+                alert(data.message);
+                if (res.ok) { switchCard('loginCard'); }
+            } catch { alert("خطأ أثناء تسجيل البيانات"); }
+        });
+
+        // كود استعادة كلمة المرور بالشروط المحددة بدقة
+        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('resetEmail').value,
+                        national_id: document.getElementById('resetNationalId').value,
+                        birth_year: document.getElementById('resetBirthYear').value,
+                        new_password: document.getElementById('resetNewPass').value
+                    })
+                });
+                const data = await res.json();
+                alert(data.message);
+                if (res.ok) { switchCard('loginCard'); }
+            } catch { alert("خطأ أثناء معالجة طلب استعادة الأمان"); }
+        });
+    </script>
+</body>
+</html>
